@@ -7,14 +7,11 @@ namespace ClientTest.Utilits
 {
     public class Md5Util
     {
-        public void _checkLocalMD5Sum(string path)
+        public string _checkLocalMD5Sum(string path)
         {
             var allfiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
-            var md5HashSum = allfiles.Aggregate(string.Empty, (current, s) => current + s + ":" + GetMd5HashFromFile(Path.GetFullPath(s)) + "\n");
-            md5HashSum = md5HashSum.Substring(0, md5HashSum.Length - 1);
-            using (var fs = new FileStream("md5HashSum.txt", FileMode.CreateNew, FileAccess.Write))
-            using (var sw = new StreamWriter(fs))
-                sw.WriteLine(md5HashSum);
+            var md5Sum = allfiles.Aggregate(string.Empty, (current, s) => current + s + ":" + GetMd5HashFromFile(Path.GetFullPath(s)) + "\n");
+            return md5Sum.Substring(0, md5Sum.Length - 1);
         }
         private static string GetMd5HashFromFile(string fileName)
         {

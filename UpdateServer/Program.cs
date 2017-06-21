@@ -49,15 +49,11 @@ namespace UpdateServer
                     var dataFromClient = Encoding.UTF8.GetString(bytesFrom);
                     dataFromClient = dataFromClient.Substring(0, dataFromClient.LastIndexOf("$", StringComparison.Ordinal));
                     if (dataFromClient.Split('$')[0] != Version)
-                    {
                         new ConnectedHandle().StartClient(socketClient);
-                        socketClient.Client.Disconnect(true);
-                        socketStream.Close();
-                    }
                     else
                     {
                         var sendBytes = Encoding.UTF8.GetBytes("Already is up to date");
-                        socketStream.Write(sendBytes,0,sendBytes.Length);
+                        socketStream.Write(sendBytes, 0, sendBytes.Length);
                         socketStream.Flush();
                         socketClient.Client.Disconnect(true);
                         socketStream.Close();

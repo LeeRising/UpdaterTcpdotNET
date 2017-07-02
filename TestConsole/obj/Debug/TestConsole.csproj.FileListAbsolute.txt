@@ -1,0 +1,6 @@
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\TestConsole\bin\Debug\TestConsole.exe.config
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\TestConsole\bin\Debug\TestConsole.exe
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\TestConsole\bin\Debug\TestConsole.pdb
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\TestConsole\obj\Debug\TestConsole.csprojResolveAssemblyReference.cache
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\TestConsole\obj\Debug\TestConsole.exe
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\TestConsole\obj\Debug\TestConsole.pdb

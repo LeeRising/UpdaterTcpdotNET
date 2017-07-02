@@ -5,8 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Launcher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="270.185" Width="408.047">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="115*"/>
+            <RowDefinition Height="54*"/>
+        </Grid.RowDefinitions>
+        <Button x:Name="TestDownloadBtn" Content="Download" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="75" Height="45"/>
+        <TextBox x:Name="LogTb" IsEnabled="True" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" Height="219" Margin="90,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="300" Grid.RowSpan="2"/>
     </Grid>
 </Window>

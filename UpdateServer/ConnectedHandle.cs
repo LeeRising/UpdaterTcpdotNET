@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -10,84 +11,77 @@ namespace UpdateServer
     public class ConnectedHandle
     {
         private TcpClient Client { get; set; }
+        public NetworkStream SocketStream { get; private set; }
         public Thread ThreadClient { get; set; }
         public List<string> FileNeedUpdate { get; set; } = new List<string>();
         public static List<FilesInformation> FilesInformationsFromClient { get; set; } = new List<FilesInformation>();
+        public string Md5FromClient { get; private set; }
 
-        public ConnectedHandle()
-        {
-
-        }
-
-        public void StartClient(TcpClient client)
+        public void StartClient(TcpClient client, string md5FromClient)
         {
             this.Client = client;
+            this.SocketStream = Client.GetStream();
+            Md5FromClient = md5FromClient;
             ThreadClient = new Thread(DoExchangeData);
             ThreadClient.Start();
         }
 
         private void DoExchangeData()
         {
-            var socketStream = Client.GetStream();
-            var bytesFrom = new byte[4096];
-            socketStream.Read(bytesFrom, 0, bytesFrom.Length);
-            var dataFromClient = Encoding.UTF8.GetString(bytesFrom);
-            dataFromClient = dataFromClient.Substring(0, dataFromClient.LastIndexOf("$", StringComparison.Ordinal));
-            var md5Files = dataFromClient.Split('$')[1];
-            foreach (var s in md5Files.Split('\n'))
-            {
-                FilesInformationsFromClient.Add(new FilesInformation
-                {
-                    PathToFile = s.Split(':')[0],
-                    Md5HashSum = s.Split(':')[1]
-                });
-            }
             var fileNeedToUpdate = new List<string>();
-            foreach (var t in FilesInformationsFromClient)
+
+            if (Md5FromClient == "null")
+                fileNeedToUpdate.AddRange(Program.FilesInformations.Select(x => x.PathToFile + ".gz").ToList());
+            else
             {
-                foreach (var t1 in Program.FilesInformations)
+                foreach (var s in Md5FromClient.Split('\n'))
                 {
-                    if(t.PathToFile == t1.PathToFile)
-                        if (t.Md5HashSum != t1.Md5HashSum)
-                            fileNeedToUpdate.Add(t1.PathToFile);
-                        else
-                        {
-                            //Ignore
-                        }
-                    else
-                        fileNeedToUpdate.Add(t1.PathToFile);
-                }
-            }
-            foreach (var v in fileNeedToUpdate)
-            {
-                using (var fs = new FileStream(v, FileMode.Open, FileAccess.Read))
-                {
-                    var noOfPackets = Convert.ToInt32(Math.Ceiling(Convert.ToDouble(fs.Length) / Convert.ToDouble(BufferSize)));
-                    //progressBar1.Maximum = NoOfPackets;
-                    var TotalLength = (int)fs.Length;
-                    var counter = 0;
-                    for (var i = 0; i < noOfPackets; i++)
+                    FilesInformationsFromClient.Add(new FilesInformation
                     {
-                        int CurrentPacketLength;
-                        if (TotalLength > BufferSize)
-                        {
-                            CurrentPacketLength = BufferSize;
-                            TotalLength = TotalLength - CurrentPacketLength;
-                        }
-                        else
-                            CurrentPacketLength = TotalLength;
-                        var sendingBuffer = new byte[CurrentPacketLength];
-                        fs.Read(sendingBuffer, 0, CurrentPacketLength);
-                        socketStream.Write(sendingBuffer, 0, sendingBuffer.Length);
-                        //if (progressBar1.Value >= progressBar1.Maximum)
-                        //    progressBar1.Value = progressBar1.Minimum;
-                        //progressBar1.PerformStep();
-                    }
+                        PathToFile = s.Split(':')[0],
+                        Md5HashSum = s.Split(':')[1]
+                    });
                 }
+                var newFiles = Program.FilesInformations.Except(FilesInformationsFromClient).Select(s => s.PathToFile + ".gz").ToList();
+                fileNeedToUpdate.AddRange(newFiles);
+                fileNeedToUpdate.AddRange(from t in FilesInformationsFromClient
+                                          from t1 in Program.FilesInformations
+                                          where t.PathToFile == t1.PathToFile
+                                          where t.Md5HashSum != t1.Md5HashSum
+                                          select t1.PathToFile + ".gz");
             }
 
+            foreach (var v in fileNeedToUpdate)
+            {
+                Console.WriteLine($"File {v} start to send");
+                var clientData = File.ReadAllBytes(v);
+                var fileName = Encoding.UTF8.GetBytes(v + " " + clientData.Length + "$");
+                WriteAndFlushStream(fileName);
+
+                WriteAndFlushStream(clientData);
+                Console.WriteLine($"File {v} was sended");
+
+                while (true)
+                {
+                    var bytes = new byte[1024];
+                    SocketStream.Read(bytes, 0, bytes.Length);
+                    var isNext = Encoding.UTF8.GetString(bytes);
+                    isNext = isNext.Substring(0, isNext.LastIndexOf("$", StringComparison.Ordinal));
+                    if (isNext == "next")
+                        break;
+                }
+            }
+            Console.WriteLine($"Client {Client.Client.RemoteEndPoint} was updated");
+
             Client.Client.Disconnect(true);
-            socketStream.Close();
+            SocketStream.Close();
+            ThreadClient.Abort();
+        }
+
+        private void WriteAndFlushStream(byte[] sendBytes)
+        {
+            SocketStream.Write(sendBytes, 0, sendBytes.Length);
+            SocketStream.Flush();
         }
     }
 }

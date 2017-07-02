@@ -11,7 +11,7 @@ namespace ClientTest.Utilits
             {
                 var newFileName = path.Remove(path.Length - 3);
                 using (var decompresFileStream = File.Create(newFileName))
-                using (var gZip = new GZipStream(decompresFileStream, CompressionMode.Decompress))
+                using (var gZip = new GZipStream(fs, CompressionMode.Decompress))
                     gZip.CopyTo(decompresFileStream);
             }
         }

@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using UpdateServer.Utilits;
 
 namespace UpdateServer
 {
@@ -14,29 +16,35 @@ namespace UpdateServer
         public static string Version { get; set; } = string.Empty;
         public static string Md5CheckSum { get; set; } = string.Empty;
         public static List<FilesInformation> FilesInformations { get; set; } = new List<FilesInformation>();
+        public static bool Isclosing { get; private set; }
         private static void Main()
         {
-            using (var sr = new StreamReader("version.txt"))
-                Version = sr.ReadToEnd();
-            Md5CheckSum = _checkLocalMD5Sum();
-            //Console.Write(Md5CheckSum);
-            foreach (var s in Md5CheckSum.Split('\n'))
+            var allfiles = Directory.GetFiles("client", "*.gz", SearchOption.AllDirectories);
+            if (allfiles.Length > 0)
+                foreach (var s in allfiles)
+                    File.Delete(s);
+
+            while (!Isclosing)
             {
-                FilesInformations.Add(new FilesInformation
+                using (var sr = new StreamReader("version.txt"))
+                    Version = sr.ReadToEnd();
+                Md5CheckSum = _checkLocalMD5Sum();
+                foreach (var s in Md5CheckSum.Split('\n'))
                 {
-                    PathToFile = s.Split(':')[0],
-                    Md5HashSum = s.Split(':')[1]
-                });
+                    FilesInformations.Add(new FilesInformation
+                    {
+                        PathToFile = s.Split(':')[0],
+                        Md5HashSum = s.Split(':')[1]
+                    });
+                    CompresUtil.Compres(s.Split(':')[0]);
+                }
+                TcpConnection();
             }
-
-            TcpConnection();
-
-            Console.ReadKey(true);
         }
 
         private static void TcpConnection()
         {
-            var listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 9656);
+            var listener = new TcpListener(IPAddress.Parse("10.154.0.2"), 9656);
             listener.Start();
             try
             {
@@ -44,12 +52,14 @@ namespace UpdateServer
                 {
                     var socketClient = listener.AcceptTcpClient();
                     var socketStream = socketClient.GetStream();
+                    Console.WriteLine($"Client {socketClient.Client.RemoteEndPoint} is connect");
                     var bytesFrom = new byte[4096];
                     socketStream.Read(bytesFrom, 0, bytesFrom.Length);
                     var dataFromClient = Encoding.UTF8.GetString(bytesFrom);
-                    dataFromClient = dataFromClient.Substring(0, dataFromClient.LastIndexOf("$", StringComparison.Ordinal));
+                    dataFromClient =
+                        dataFromClient.Substring(0, dataFromClient.LastIndexOf("$", StringComparison.Ordinal));
                     if (dataFromClient.Split('$')[0] != Version)
-                        new ConnectedHandle().StartClient(socketClient);
+                        new ConnectedHandle().StartClient(socketClient, dataFromClient.Split('$')[1]);
                     else
                     {
                         var sendBytes = Encoding.UTF8.GetBytes("Already is up to date");
@@ -78,6 +88,44 @@ namespace UpdateServer
             using (var stream = File.OpenRead(fileName))
                 return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", string.Empty);
         }
+
+        #region CloseConsoleHoock
+        [DllImport("user32.dll")]
+        static extern int SetWindowText(IntPtr hWnd, string text);
+        private static bool ConsoleCtrlCheck(CtrlTypes ctrlType)
+        {
+            switch (ctrlType)
+            {
+                case CtrlTypes.CTRL_CLOSE_EVENT:
+                    Isclosing = true;
+                    break;
+                case CtrlTypes.CTRL_C_EVENT:
+                    Isclosing = true;
+                    break;
+                case CtrlTypes.CTRL_BREAK_EVENT:
+                    Isclosing = true;
+                    break;
+                case CtrlTypes.CTRL_LOGOFF_EVENT:
+                case CtrlTypes.CTRL_SHUTDOWN_EVENT:
+                    Isclosing = true;
+                    break;
+
+            }
+            return true;
+        }
+        [DllImport("Kernel32")]
+        public static extern bool SetConsoleCtrlHandler(HandlerRoutine Handler, bool Add);
+        public delegate bool HandlerRoutine(CtrlTypes CtrlType);
+        public enum CtrlTypes
+        {
+            CTRL_C_EVENT = 0,
+            CTRL_BREAK_EVENT,
+            CTRL_CLOSE_EVENT,
+            CTRL_LOGOFF_EVENT = 5,
+            CTRL_SHUTDOWN_EVENT
+        }
+
+        #endregion
     }
 
     public class FilesInformation

@@ -56,6 +56,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Transitions\CircleWipe.cs" />
+    <Compile Include="Transitions\FadeWipe.cs" />
+    <Compile Include="Transitions\IndexedItemOffsetMultiplierExtension.cs" />
+    <Compile Include="Transitions\ITransitionEffect.cs" />
+    <Compile Include="Transitions\ITransitionEffectSubject.cs" />
+    <Compile Include="Transitions\ITransitionWipe.cs" />
+    <Compile Include="Transitions\IZIndexController.cs" />
+    <Compile Include="Transitions\SlideDirection.cs" />
+    <Compile Include="Transitions\SlideOutWipe.cs" />
+    <Compile Include="Transitions\SlideWipe.cs" />
+    <Compile Include="Transitions\TransitionAssist.cs" />
+    <Compile Include="Transitions\TransitionEffect.cs" />
+    <Compile Include="Transitions\TransitionEffectBase.cs" />
+    <Compile Include="Transitions\TransitionEffectExtension.cs" />
+    <Compile Include="Transitions\TransitionEffectKind.cs" />
+    <Compile Include="Transitions\TransitionEffectTypeConverter.cs" />
+    <Compile Include="Transitions\Transitioner.cs" />
+    <Compile Include="Transitions\TransitionerSlide.cs" />
+    <Compile Include="Transitions\TransitionerSlideState.cs" />
+    <Compile Include="Transitions\TransitioningContent.cs" />
+    <Compile Include="Transitions\TransitioningContentBase.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -64,10 +85,25 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Converters\ArcEndPointConverter.cs" />
+    <Compile Include="Converters\ArcSizeConverter.cs" />
+    <Compile Include="Converters\LargeArcConverter.cs" />
+    <Compile Include="Converters\LocalEx.cs" />
+    <Compile Include="Converters\RotateTransformCentreConverter.cs" />
+    <Compile Include="Converters\RotateTransformConverter.cs" />
+    <Compile Include="Converters\StartPointConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Styles\Colors.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\CustomProgressBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

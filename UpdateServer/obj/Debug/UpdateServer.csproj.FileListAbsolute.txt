@@ -14,7 +14,7 @@ Z:\MyProject\UpdaterTcpdotNET\UpdateServer\obj\Debug\UpdateServer.pdb
 Z:\MyProject\UpdaterTcpdotNET\UpdateServer\obj\Debug\UpdateServer.csprojResolveAssemblyReference.cache
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\bin\Debug\UpdateServer.exe
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\bin\Debug\UpdateServer.pdb
-D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\obj\Debug\UpdateServer.csprojResolveAssemblyReference.cache
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\obj\Debug\UpdateServer.exe
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\obj\Debug\UpdateServer.pdb
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\bin\Debug\UpdateServer.exe.config
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\UpdateServer\obj\Debug\UpdateServer.csprojResolveAssemblyReference.cache

@@ -17,62 +17,66 @@ namespace UpdateServer
         public static string Md5CheckSum { get; set; } = string.Empty;
         public static List<FilesInformation> FilesInformations { get; set; } = new List<FilesInformation>();
         public static bool Isclosing { get; private set; }
+        public static string DateTimeNow => DateTime.Now.ToString("[dd-MM-yyyy HH:mm:ss] ");
+
         private static void Main()
         {
+            Console.WriteLine(DateTimeNow + "Server started\n");
             var allfiles = Directory.GetFiles("client", "*.gz", SearchOption.AllDirectories);
             if (allfiles.Length > 0)
                 foreach (var s in allfiles)
                     File.Delete(s);
 
-            while (!Isclosing)
+            Console.WriteLine(DateTimeNow + "Check version and get files md5-hash");
+            using (var sr = new StreamReader("version.txt"))
+                Version = sr.ReadToEnd();
+            Md5CheckSum = _checkLocalMD5Sum();
+
+            Console.WriteLine(DateTimeNow + "Start files decomprasion");
+            foreach (var s in Md5CheckSum.Split('\n'))
             {
-                using (var sr = new StreamReader("version.txt"))
-                    Version = sr.ReadToEnd();
-                Md5CheckSum = _checkLocalMD5Sum();
-                foreach (var s in Md5CheckSum.Split('\n'))
+                FilesInformations.Add(new FilesInformation
                 {
-                    FilesInformations.Add(new FilesInformation
-                    {
-                        PathToFile = s.Split(':')[0],
-                        Md5HashSum = s.Split(':')[1]
-                    });
-                    CompresUtil.Compres(s.Split(':')[0]);
-                }
-                TcpConnection();
+                    PathToFile = s.Split(':')[0],
+                    Md5HashSum = s.Split(':')[1]
+                });
+                CompresUtil.Compres(s.Split(':')[0]);
             }
+            Console.WriteLine(DateTimeNow + "Files was decomprased\n");
+
+            TcpConnection();
         }
 
         private static void TcpConnection()
         {
-            var listener = new TcpListener(IPAddress.Parse("10.154.0.2"), 9656);
+            var listener = new TcpListener(IPAddress.Parse("10.154.0.2"), 9656);//10.154.0.2
             listener.Start();
+            Console.WriteLine(DateTimeNow + "TcpListener started");
             try
             {
                 while (true)
                 {
                     var socketClient = listener.AcceptTcpClient();
                     var socketStream = socketClient.GetStream();
-                    Console.WriteLine($"Client {socketClient.Client.RemoteEndPoint} is connect");
+                    Console.WriteLine(DateTimeNow + $"Client {socketClient.Client.RemoteEndPoint} is connect");
                     var bytesFrom = new byte[4096];
-                    socketStream.Read(bytesFrom, 0, bytesFrom.Length);
+                    socketStream.Read(bytesFrom,0,bytesFrom.Length);
                     var dataFromClient = Encoding.UTF8.GetString(bytesFrom);
-                    dataFromClient =
-                        dataFromClient.Substring(0, dataFromClient.LastIndexOf("$", StringComparison.Ordinal));
+                    dataFromClient = dataFromClient.Substring(0, dataFromClient.LastIndexOf("$", StringComparison.Ordinal));
                     if (dataFromClient.Split('$')[0] != Version)
                         new ConnectedHandle().StartClient(socketClient, dataFromClient.Split('$')[1]);
                     else
                     {
-                        var sendBytes = Encoding.UTF8.GetBytes("Already is up to date");
+                        var sendBytes = Encoding.UTF8.GetBytes("Already is up to date$");
                         socketStream.Write(sendBytes, 0, sendBytes.Length);
-                        socketStream.Flush();
                         socketClient.Client.Disconnect(true);
                         socketStream.Close();
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                // ignored
+                Console.WriteLine(exception);
             }
         }
 

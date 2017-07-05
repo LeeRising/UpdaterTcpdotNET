@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Launcher"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options">
+    <SolidColorBrush x:Key="IdigoA700" Color="#304FFE" po:Freeze="True" />
+    <SolidColorBrush x:Key="Blue900" Color="#0D47A1" po:Freeze="True" />
+    <SolidColorBrush x:Key="BlueA400" Color="#2979FF" po:Freeze="True" />
+</ResourceDictionary>

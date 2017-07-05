@@ -28,6 +28,7 @@ namespace UpdateServer
 
         private void DoExchangeData()
         {
+            Console.WriteLine(Program.DateTimeNow + "Create file list, from files need to update");
             var fileNeedToUpdate = new List<string>();
 
             if (Md5FromClient == "null")
@@ -50,19 +51,17 @@ namespace UpdateServer
                                           where t.Md5HashSum != t1.Md5HashSum
                                           select t1.PathToFile + ".gz");
             }
-
             foreach (var v in fileNeedToUpdate)
             {
-                Console.WriteLine($"File {v} start to send");
+                Console.WriteLine(Program.DateTimeNow + $"File {v} start to send");
                 var clientData = File.ReadAllBytes(v);
                 var fileName = Encoding.UTF8.GetBytes(v + " " + clientData.Length + "$");
-                WriteAndFlushStream(fileName);
-
-                WriteAndFlushStream(clientData);
-                Console.WriteLine($"File {v} was sended");
-
+                SocketStream.Write(fileName, 0, fileName.Length);
+                SocketStream.Write(clientData, 0, clientData.Length);
+                //Client.Client.SendFile(v);
                 while (true)
                 {
+                    Console.WriteLine(Program.DateTimeNow + "Wait response from client");
                     var bytes = new byte[1024];
                     SocketStream.Read(bytes, 0, bytes.Length);
                     var isNext = Encoding.UTF8.GetString(bytes);
@@ -70,18 +69,14 @@ namespace UpdateServer
                     if (isNext == "next")
                         break;
                 }
+                Console.WriteLine(Program.DateTimeNow + $"File {v} was sended");
+                Console.WriteLine(Program.DateTimeNow + "Go to next file");
             }
-            Console.WriteLine($"Client {Client.Client.RemoteEndPoint} was updated");
+            Console.WriteLine(Program.DateTimeNow + $"Client {Client.Client.RemoteEndPoint} was updated\n");
 
             Client.Client.Disconnect(true);
             SocketStream.Close();
             ThreadClient.Abort();
-        }
-
-        private void WriteAndFlushStream(byte[] sendBytes)
-        {
-            SocketStream.Write(sendBytes, 0, sendBytes.Length);
-            SocketStream.Flush();
         }
     }
 }

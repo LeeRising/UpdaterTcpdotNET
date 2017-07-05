@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -26,23 +27,24 @@ namespace Launcher
     {
         private NetworkStream _serverStream;
         private TcpClient _serverSocket;
-        protected readonly Thread Thread;
+        private Thread _thread;
         private byte[] _bytesFromServer;
+        private string _fileNameAndSize;
+        private const int BlockSize = 1024;
 
         public MainWindow()
         {
             InitializeComponent();
-            Thread = new Thread(GetServerData);
             TestDownloadBtn.Click += delegate
             {
+                _thread = new Thread(GetServerData);
                 try
                 {
-                    _serverSocket = new TcpClient("35.189.94.197", 9656);
+                    _serverSocket = new TcpClient("35.189.94.197", 9656); //35.189.94.197
                     _serverStream = _serverSocket.GetStream();
                     var bytes = Encoding.UTF8.GetBytes("11010$null" + "$");
                     _serverStream.Write(bytes, 0, bytes.Length);
-                    _serverStream.Flush();
-                    Thread.Start();
+                    _thread.Start();
                 }
                 catch (Exception e)
                 {
@@ -57,30 +59,29 @@ namespace Launcher
             {
                 while (true)
                 {
-                    _bytesFromServer = new byte[1024];
+                    _bytesFromServer = new byte[4096];
                     _serverStream.Read(_bytesFromServer, 0, _bytesFromServer.Length);
-                    var fileNameAndSize = Encoding.UTF8.GetString(_bytesFromServer);
-                    fileNameAndSize = fileNameAndSize.Substring(0, fileNameAndSize.LastIndexOf("$", StringComparison.Ordinal));
-                    var fileSize = Convert.ToInt32(fileNameAndSize.Split(' ')[1]);
-                    
-                    await LogTb.Dispatcher.InvokeAsync(() =>
-                    {
-                        LogTb.Text += $"{fileNameAndSize.Split(' ')[0]} [{fileNameAndSize.Split(' ')[1]}]\n";
-                    });
+                    _fileNameAndSize = Encoding.UTF8.GetString(_bytesFromServer);
+                    _fileNameAndSize = _fileNameAndSize.Substring(0, _fileNameAndSize.LastIndexOf("$", StringComparison.Ordinal));
+                    var fileSize = Convert.ToInt32(_fileNameAndSize.Split(' ')[1]);
+                    await LogTb.Dispatcher.InvokeAsync(() =>{LogTb.Text += $"{_fileNameAndSize.Split(' ')[0]} [{fileSize}]\n";});
 
                     var fullFileBytes = new byte[fileSize];
-                    _serverStream.Read(fullFileBytes, 0, fullFileBytes.Length);
-                    using (var write = new BinaryWriter(File.Open(fileNameAndSize.Split(' ')[0], FileMode.CreateNew)))
+                    int i = _serverStream.Read(fullFileBytes, 0, fullFileBytes.Length);//12780
+                    await LogTb.Dispatcher.InvokeAsync(() => { LogTb.Text += $"{i}\n"; });
+                    using (var write = new BinaryWriter(File.Open(_fileNameAndSize.Split(' ')[0], FileMode.OpenOrCreate)))
                         write.Write(fullFileBytes);
-                    _serverStream.Write(Encoding.UTF8.GetBytes("next$"),0,5);
-                    _serverStream.Flush();
+                    var nextByte = Encoding.UTF8.GetBytes("next$");
+                    _serverStream.Write(nextByte, 0, nextByte.Length);
                 }
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                //MessageBox.Show(exception.ToString());
+                Thread.Sleep(1);
                 _serverSocket.Client.Disconnect(true);
                 _serverStream.Close();
-                Thread.Abort();
+                _thread.Abort();
             }
         }
     }

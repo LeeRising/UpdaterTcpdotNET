@@ -27,7 +27,6 @@ D:\MyProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.pdb
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\bin\Debug\Launcher.exe.config
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\bin\Debug\Launcher.exe
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\bin\Debug\Launcher.pdb
-D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.csprojResolveAssemblyReference.cache
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\MainWindow.g.cs
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\App.g.cs
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher_MarkupCompile.cache
@@ -38,3 +37,7 @@ D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.Pr
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.csproj.GenerateResource.Cache
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.exe
 D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.pdb
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\GeneratedInternalTypeHelper.g.cs
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Styles\Colors.baml
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Styles\CustomProgressBar.baml
+D:\MyProject\MyGitHubTestProject\UpdaterTcpdotNET\Launcher\obj\Debug\Launcher.csprojResolveAssemblyReference.cache
